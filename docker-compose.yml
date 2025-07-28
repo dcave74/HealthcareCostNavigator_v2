@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hcs
+      POSTGRES_USER: hcs_user
+      POSTGRES_PASSWORD: hcs_password  # FOR LOCAL DEVELOPMENT ONLY, DO NOT USE THESE PASSWORDS OTHERWISE
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hcs_user -d hcs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db_test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hcs_test
+      POSTGRES_USER: hcs_user_test
+      POSTGRES_PASSWORD: hcs_password_test  # FOR LOCAL DEVELOPMENT ONLY, DO NOT USE THESE PASSWORDS OTHERWISE
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hcs_user_test -d hcs_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://hcs_user:hcs_password@db:5432/hcs  # FOR LOCAL DEVELOPMENT ONLY, DO NOT USE THESE PASSWORDS OTHERWISE
+      - TEST_DATABASE_URL=postgresql://hcs_user_test:hcs_password_test@db_test:5432/hcs_test  # FOR LOCAL DEVELOPMENT ONLY, DO NOT USE THESE PASSWORDS OTHERWISE
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      db_test:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+volumes:
+  postgres_data:
+  postgres_test_data:

@@ -1,0 +1,14 @@
+fastapi==0.116.1
+sqlalchemy==2.0.41
+psycopg2-binary==2.9.9
+uvicorn[standard]==0.24.0
+pydantic==2.12.0a1
+openai==1.97.0
+requests==2.32.4
+pandas==2.1.0
+geoalchemy2==0.14.0
+pytest==7.4.0
+pytest-asyncio==0.21.0
+httpx==0.25.0
+python-multipart==0.0.19
+pydantic-settings==2.10.1
