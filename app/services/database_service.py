@@ -1,3 +1,4 @@
+import math
 
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -100,6 +101,15 @@ class DatabaseService:
         pricing_data = {k: v for k, v in data.items() if k in pricing_fields}
 
         if 'ms_drg_definition' in pricing_data:
+            if 'averaged_covered_charges' in pricing_data:
+                averaged_covered_charges = math.trunc(float(pricing_data['averaged_covered_charges']))
+                pricing_data['averaged_covered_charges'] = averaged_covered_charges
+            if 'average_total_payments' in pricing_data:
+                average_total_payments = math.trunc(float(pricing_data['average_total_payments']))
+                pricing_data['average_total_payments'] = average_total_payments
+            if 'average_medicare_payments' in pricing_data:
+                average_medicare_payments = math.trunc(float(pricing_data['average_medicare_payments']))
+                pricing_data['average_medicare_payments'] = average_medicare_payments
             pricing = ProviderPricing(**pricing_data)
             self.db.add(pricing)
 

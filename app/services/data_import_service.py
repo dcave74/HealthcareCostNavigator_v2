@@ -66,11 +66,11 @@ class DataImportService:
                 "rndrng_prvdr_state_abrvtn": "provider_state",
                 "zip code": "provider_zip_code",
                 "rndrng_prvdr_zip5": "provider_zip_code",
-                "drg_desc": "ms_drg_description",
+                "drg_desc": "ms_drg_definition",
                 "tot_dschrgs": "total_discharges",
-                "avg_submtd_cvd_chrg": "averaged_covered_charges",
+                "avg_submtd_cvrd_chrg": "averaged_covered_charges",
                 "avg_tot_pymt_amt": "average_total_payments",
-                "avg_mdcd_pymt_amt": "average_medicate_payments",
+                "avg_mdcr_pymt_amt": "average_medicare_payments",
                 "hospital overall rating": "provider_overall_rating",
                 "patient survey star rating": "provider_star_rating"
             }

@@ -10,6 +10,7 @@
     - **PostGIS Integration**: Calculate distances between zip codes
     - **Data Import**: Automated data seeding from CMS datasets
     - **Docker Support**: Complete containerization with PostgreSQL and PostGIS
+    - **PostGIS**:  PostGIS is usually preinstalled on cloud PostgreSQL instances.  If it is not or you are building locally, make sure it is installed on your machine where PostgreSQL is installed.
     
     ## Quick Start
     
