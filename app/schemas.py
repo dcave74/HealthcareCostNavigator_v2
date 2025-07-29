@@ -23,4 +23,3 @@ class QuestionRequest(BaseModel):
 
 class QuestionResponse(BaseModel):
     answer: str
-    query_used: Optional[str] = None
