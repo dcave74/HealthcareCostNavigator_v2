@@ -1,5 +1,5 @@
 
-    # Healthcare Provider Analysis API
+    # Healthcare Cost Navigator API
     
     A FastAPI application for analyzing healthcare provider data using natural language queries powered by OpenAI GPT-4.1 nano.
     
