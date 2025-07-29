@@ -16,7 +16,7 @@ app.include_router(router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
-    return {"message": "Healthcare Provider Analysis API"}
+    return {"message": "Healthcare Cost Provider API"}
 
 @app.get("/health")
 async def health_check():
