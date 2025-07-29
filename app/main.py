@@ -7,8 +7,8 @@ from .database import engine, Base
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Healthcare Provider Analysis API",
-    description="API for analyzing healthcare provider data with natural language queries",
+    title="Healthcare Cost Provider API",
+    description="API for providing healthcare provider data with natural language queries",
     version="1.0.0"
 )
 
