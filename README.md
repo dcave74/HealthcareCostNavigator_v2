@@ -105,6 +105,7 @@ Use service methods to import custom data
     - **OpenAI GPT-4.1 nano**: Natural language processing
     - **Docker**: Containerization
     - **Pytest**: Testing framework
+        - NOTE: Currently all tests will fail, need updates and env var resolution
     
     ## Data Sources
     
@@ -115,11 +116,15 @@ Use service methods to import custom data
     Both datasets are processed and normalized during import.
 
     ## Sample questions to ask:
-    - Who has the best ratings for heart surgery near 10032?
+    - Who has the best ratings for heart operations near 10032?
     - Who is best rating for knees within 10km of 26201?
     - Who is cheapest for kidneys within 11km of 36301?
     - How many providers do kidneys within 11km of 36301?
     - What is the average cost for backs within 1km of 36301?
+    - NOTE: Using GPT4.1nano the queries being returned from OpenAI are unstable, they can change call to call
+        - This can affect any given question at any given time even asking the same question multiple times
+        - As such question response validity will vary regardless of the question, but moreso with ratings as OpenAI makes mistakes in its own table aliasing
+        - This may be fixable in better models, needs investigating
 
 This completes the comprehensive FastAPI project structure. The project includes:
 
