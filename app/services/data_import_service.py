@@ -66,6 +66,7 @@ class DataImportService:
                 "rndrng_prvdr_state_abrvtn": "provider_state",
                 "zip code": "provider_zip_code",
                 "rndrng_prvdr_zip5": "provider_zip_code",
+                "drg_cd": "ms_drg_code",
                 "drg_desc": "ms_drg_definition",
                 "tot_dschrgs": "total_discharges",
                 "avg_submtd_cvrd_chrg": "averaged_covered_charges",

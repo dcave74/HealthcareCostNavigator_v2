@@ -93,7 +93,7 @@ class DatabaseService:
     def _import_pricing_data(self, data: Dict[str, Any]):
         """Import pricing data"""
         pricing_fields = {
-            'provider_id', 'ms_drg_definition', 'total_discharges',
+            'provider_id', 'ms_drg_code', 'ms_drg_definition', 'total_discharges',
             'averaged_covered_charges', 'average_total_payments',
             'average_medicare_payments', 'provider_pricing_year'
         }
@@ -101,6 +101,16 @@ class DatabaseService:
         pricing_data = {k: v for k, v in data.items() if k in pricing_fields}
 
         if 'ms_drg_definition' in pricing_data:
+            # ms_drg_code really should be its own field to allow indexing and avoid
+            # string comparisons.  Implemented this way per requirements pending
+            # a technical discussion about adding the column to the schema
+            if 'ms_drg_code' in pricing_data:
+                ms_drg_definition = pricing_data['ms_drg_code'] + '-' + pricing_data['ms_drg_definition']
+                pricing_data['ms_drg_definition'] = ms_drg_definition
+                pricing_data.pop('ms_drg_code')
+
+            # These are temporary pending business clarification and should either be
+            # implemented more efficiently or stored in a decimal form of some precision
             if 'averaged_covered_charges' in pricing_data:
                 averaged_covered_charges = math.trunc(float(pricing_data['averaged_covered_charges']))
                 pricing_data['averaged_covered_charges'] = averaged_covered_charges

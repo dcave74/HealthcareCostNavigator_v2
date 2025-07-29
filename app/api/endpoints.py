@@ -12,8 +12,9 @@ router = APIRouter()
 
 @router.get("/providers", response_model=List[ProviderSearchResponse])
 async def search_providers(
-    provider_id: Optional[int] = Query(None),
-    provider_name: Optional[str] = Query(None),
+    # See below business case question for these two parameters
+    # provider_id: Optional[int] = Query(None),
+    # provider_name: Optional[str] = Query(None),
     drg_description: Optional[str] = Query(None),
     zip_code: Optional[str] = Query(None),
     zip_code_radius_km: Optional[float] = Query(None),
@@ -22,11 +23,15 @@ async def search_providers(
     """Search providers by various criteria"""
 
     # Validate required parameters
-    if not (provider_id or provider_name):
-        raise HTTPException(status_code=400, detail="Either provider_id or provider_name is required")
+    #if not (provider_id or provider_name):
+    #    raise HTTPException(status_code=400, detail="Either provider_id or provider_name is required")
 
-    if not (drg_description or zip_code):
-        raise HTTPException(status_code=400, detail="Either drg_description or zip_code is required")
+    # See below zip code business case question
+    # if not (drg_description or zip_code):
+    #     raise HTTPException(status_code=400, detail="Either drg_description or zip_code is required")
+
+    if not (drg_description and zip_code and zip_code_radius_km):
+        raise HTTPException(status_code=400, detail="All of drg_description, zip_code, and radius_km are required")
 
     try:
         db_service = DatabaseService(db)
@@ -38,36 +43,42 @@ async def search_providers(
             SELECT p.provider_id, p.provider_name, pp.averaged_covered_charges
             FROM provider p
             JOIN provider_pricing pp ON p.provider_id = pp.provider_id
-            WHERE pp.ms_drg_definition ILIKE :drg_description
+            WHERE pp.ms_drg_definition ILIKE :drg_description 
+            and p.provider_zip_code = :zip_code
             """
-            params = {"drg_description": f"%{drg_description}%"}
+            params = {
+                "drg_description": f"%{drg_description}%",
+                "zip_code": zip_code
+            }
 
-            if provider_id:
-                query += " AND p.provider_id = :provider_id"
-                params["provider_id"] = provider_id
-            elif provider_name:
-                query += " AND p.provider_name ILIKE :provider_name"
-                params["provider_name"] = f"%{provider_name}%"
+            # See business question about provider querying
+            # if provider_id:
+            #     query += " AND p.provider_id = :provider_id"
+            #     params["provider_id"] = provider_id
+            # elif provider_name:
+            #     query += " AND p.provider_name ILIKE :provider_name"
+            #     params["provider_name"] = f"%{provider_name}%"
 
-            query += " ORDER BY p.provider_id, pp.averaged_covered_charges"
+            query += " ORDER BY pp.averaged_covered_charges, p.provider_id"
 
-        else:
+        # else:
             # Search by zip code
-            query = """
-            SELECT p.provider_id, p.provider_name
-            FROM provider p
-            WHERE p.provider_zip_code = :zip_code
-            """
-            params = {"zip_code": zip_code}
+            # Business case question:  shouldn't the customer be able to find local providers?
+            # query = """
+            # SELECT p.provider_id, p.provider_name
+            # FROM provider p
+            # WHERE p.provider_zip_code = :zip_code
+            # """
+            # params = {"zip_code": zip_code}
 
-            if provider_id:
-                query += " AND p.provider_id = :provider_id"
-                params["provider_id"] = provider_id
-            elif provider_name:
-                query += " AND p.provider_name ILIKE :provider_name"
-                params["provider_name"] = f"%{provider_name}%"
+            # if provider_id:
+            #    query += " AND p.provider_id = :provider_id"
+            #    params["provider_id"] = provider_id
+            # elif provider_name:
+            #     query += " AND p.provider_name ILIKE :provider_name"
+            #     params["provider_name"] = f"%{provider_name}%"
 
-            query += " ORDER BY p.provider_id"
+            # query += " ORDER BY p.provider_id"
 
         results = db_service.execute_safe_query(query, params)
 
