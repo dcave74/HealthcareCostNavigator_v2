@@ -1,0 +1,137 @@
+Claude project generation script
+
+- Create a python 3.11 fastapi 0.116.1 sqlalchemy 2.0.41 postgresql 16 project with test cases contained in a docker container using docker compose for deployment.
+- Do not use pydantic validate email.
+- Create a class with functions to connect to the OpenAI GPT-4.1 nano API
+    - Accept a natural language statement
+    - Send a request to OpenAI including table schemas to convert the natural language statement to postgre sql
+        - Use ILIIKE for msg_drg_description matching
+        - Use PostGIS for provider_zip_code distance calculations
+    - Validate response from OpenAI
+        - Handle any response errors gracefully
+    - Query PostgreSQL database using the OpenAI provided query
+    - Validate response from database
+        - Handle any errors gracefully
+- For the PostgreSQL database:
+    - Add a database named “hcs”
+    - Add a test database named “hcs_test”
+    - Add to database “hcs”  a user “hcs_user” with password “hcs_password”
+    - Add to database “hcs_test”  a user “hcs_user_test” with password “hcs_password_test”
+    - Add warning comments anywhere these passwords are added in code “FOR LOCAL DEVELOPMENT ONLY, DO NOT USE THESE PASSWORDS OTHERWISE”
+    - Add PostGIS 3.5
+    - To both databases add tables:
+        - CREATE TABLE provider (
+                provider_id INT,
+                provider_name VARCHAR(255),
+                provider_city VARCHAR(255),
+                provider_state VARCHAR(2),
+                provider_zip_code VARCHAR(20),
+                provider_status VARCHAR(20)
+            );
+            - PK provider_id
+            - separate indexes on
+                - zip_code
+                - provider_id, provider_name, provider_city, provider_state, provider_zip_code must not be null or empty
+                - default status to “UNKNOWN” if not provided
+        - CREATE TABLE provider_pricing (
+                provider_id INT,
+                ms_drg_definition VARCHAR(1000),
+                total_discharges INT,
+                averaged_covered_charges INT,
+                average_total_payments INT,
+                average_medicare_payments INT,
+                provider_pricing_year INT
+            );
+            - FK provider.provider_id==provider_pricing.provider_id
+            - index on
+                - ms_drg_definition
+            - provider_id and ms_drg_definition must not be empty
+            - default other fields to 0 if not provided
+        - CREATE TABLE provider_rating (
+                provider_id INT,
+                provider_overall_rating INT,
+                provider_star_rating INT,
+                provider_rating_year
+            );
+            - FK provider.provider_id==provider_rating.provider_id
+            - default other field to 0 if not provided
+    - Create a sqlanywhere function to:
+        - accept in a text query
+        - parameterize the query to avoid sql injection attacks
+        - make the database call
+        - validate the response
+            - handle any errors gracefully
+    - Create a sqlanywhere function to
+        - use PostGIS to return the distances between two provided string zip codes
+    - Create a sqlanywhere function to
+        - accept a list of strings
+            - each string must be in JSON format
+            - if any of the JSON string objects does not have provider_id element then error
+            - Import the data into tables provider, provider_rating, and provider_pricing
+                - For each JSON object
+                    - Include all JSON elements where the JSON element names match the table columns
+                    - Ignore elements that do not match the table columns
+        - Handle errors gracefully
+- Add a GET JSON “/providers” API and functions to:
+    - Search provider_id or provider_name by
+        - drg_description
+            - drg_description maps to database field ms_drg_definition
+        - zip_code
+        - zip_code_radius_km
+            - zip_code_radius_km is defined as the distance from the given zip_code to search
+        - Either provider_id or provider_name are required request parameters
+        - Either drg_decription or zip_code are required request query parameters
+    - If drg_description was included in the request
+        - return provider_id, provider_name, and average_covered_charges sorted by provider_id and average_covered_charges
+    - in drg_description was not included in the request
+        - Return provider_id and provider_name sorted by provider_id
+    - Make call to database function to get results
+        - Handle errors gracefully
+- Add a POST JSON “/ask API and functions to:
+    - Accept a text natural language value in a “question” element in the JSON request body
+    - Connect to OpenAI API to convert “question” to a Postgresql 16 query
+        - Send table schemas in OpenAI request
+    - Validate that the response from OpenAI is valid
+        - Handle failures or empty responses gracefully
+    - Call the database function for the result
+        - Handle any errors gracefully
+    - Return a sensible answer if nothing found
+    - Return the query result if result found
+- Create a class to import data
+    - Create an internal  function to:
+        - accept a
+            - string url
+            - string file name
+            - string file extension
+            - string file type
+            - list string subfiles
+        - Connect to the provided url
+            - retrieve the provided file name and file extension into memory
+            - if the file type is “ZIP” and subfiles is not empty
+                - extract the files into memory
+            - if the url file or the extracted files are not csv
+                - return a graceful error
+            - call function and convert the csv files to json
+        - return the results in a list of the json text of the file or files
+    - Create a function to convert provided csv file to json
+        - for any row in the csv file
+            - ignoring case if “hospital overall rating” == “not applicable” skip the row
+            - ignoring case if “patient survey star rating” == “not applicable skip the row
+            - ignoring case if “hcahps answer description” != “summary star rating” skip the row
+        - for each element json element make the following mapping name changes if present ignoring case
+            - “facility id” → provider_id
+            - “facility name” → provider_name
+            - “address” → provider_address
+            - “city/town” → provider_city
+            - “state” → provider_state
+            - “zip code” → provide_zip_code
+            - “hospital overall rating” → provider_overall_rating
+            - “patient survey star rating” → provider_star_rating
+        - return json
+        - handle errors gracefully
+- Add to startup script to seed data to both databases using the following url data:
+    - "https://data.cms.gov/sites/default/files/2024-05/7d1f4bcd-7dd9-4fd1-aa7f-91cd69e452d3/MUP_INP_RY24_P03_V10_DY22_PrvSvc.CSV”
+    - “https://data.cms.gov/provider-data/sites/default/files/archive/Hospitals/current/hospitals_current_data.zip”
+
+.
+

@@ -114,6 +114,13 @@ Use service methods to import custom data
     
     Both datasets are processed and normalized during import.
 
+    ## Sample questions to ask:
+    - Who has the best ratings for heart surgery near 10032?
+    - Who is best rating for knees within 10km of 26201?
+    - Who is cheapest for kidneys within 11km of 36301?
+    - How many providers do kidneys within 11km of 36301?
+    - What is the average cost for backs within 1km of 36301?
+
 This completes the comprehensive FastAPI project structure. The project includes:
 
 1. Complete Docker setup with PostgreSQL 16 and PostGIS 3.5
@@ -137,5 +144,6 @@ Key features implemented:
 To get started, you'll need to:
 
 1. Set up your OpenAI API key in the `.env` file
+2. Set the appropriate platform for PostGIS in docker-compose.yml
 2. Run `docker-compose up --build`
 3. Optionally run the data seeding script to populate with real CMS data

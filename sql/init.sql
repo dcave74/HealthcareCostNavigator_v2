@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- Create tables for hcs database
 CREATE TABLE IF NOT EXISTS provider (
-    provider_id INT PRIMARY KEY,
+    provider_id VARCHAR(20) PRIMARY KEY,
     provider_name VARCHAR(255) NOT NULL,
     provider_city VARCHAR(255) NOT NULL,
     provider_state VARCHAR(2) NOT NULL,
@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_provider_zip_code ON provider(provider_zip_code);
 
 CREATE TABLE IF NOT EXISTS provider_pricing (
     provider_pricing_id SERIAL PRIMARY KEY,
-    provider_id INT NOT NULL,
+    provider_id VARCHAR(20) NOT NULL,
     ms_drg_definition VARCHAR(1000) NOT NULL,
     total_discharges INT DEFAULT 0,
     averaged_covered_charges INT DEFAULT 0,
@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_provider_pricing_ms_drg ON provider_pricing(ms_dr
 
 CREATE TABLE IF NOT EXISTS provider_rating (
     provider_rating_id SERIAL PRIMARY KEY,
-    provider_id INT NOT NULL,
+    provider_id VARCHAR(20) NOT NULL,
     provider_overall_rating INT DEFAULT 0,
     provider_star_rating INT DEFAULT 0,
     provider_rating_year INT,

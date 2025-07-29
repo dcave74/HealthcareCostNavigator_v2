@@ -98,18 +98,16 @@ class DataImportService:
     def _should_skip_row(self, row: Dict[str, Any]) -> bool:
         """Check if row should be skipped based on criteria"""
         # Check hospital overall rating
-        overall_rating = str(row.get("hospital overall rating", "")).lower()
-        if overall_rating and overall_rating == "not applicable":
+        if row.get("Hospital overall rating") and not str(row.get("Hospital overall rating")).isdigit():
             return True
 
         # Check patient survey star rating
-        star_rating = str(row.get("patient survey star rating", "")).lower()
-        if star_rating and star_rating == "not applicable":
+        if row.get("Patient Survey Star Rating") and not str(row.get("Patient Survey Star Rating")).isdigit():
             return True
 
         # Check HCAHPS answer description
-        hcahps_desc = str(row.get("hcahps answer description", "")).lower()
-        if hcahps_desc and hcahps_desc != "summary star rating":
-            return True
+        if row.get("HCAHPS Answer Description") and not str(row.get("HCAHPS Answer Description")).isdigit():
+            if str(row.get("HCAHPS Answer Description")).lower() != "summary star rating":
+                return True
 
         return False

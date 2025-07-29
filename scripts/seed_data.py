@@ -18,14 +18,14 @@ async def seed_data():
             "file_extension": "CSV",
             "file_type": "CSV",
             "subfiles": []
-        }#,
-        #{
-        #    "url": "https://data.cms.gov/provider-data/sites/default/files/archive/Hospitals/current/hospitals_current_data.zip",
-        #    "filename": "hospitals_current_data.zip",
-        #    "file_extension": "zip",
-        #    "file_type": "ZIP",
-        #    "subfiles": ["Hospital_General_Information.csv"]  # Assuming this is in the ZIP
-        #}
+        },
+        {
+            "url": "https://data.cms.gov/provider-data/sites/default/files/archive/Hospitals/current/hospitals_current_data.zip",
+            "filename": "hospitals_current_data.zip",
+            "file_extension": "zip",
+            "file_type": "ZIP",
+            "subfiles": ["Hospital_General_Information.csv", "HCAHPS-Hospital.csv"]  # Assuming this is in the ZIP
+        }
     ]
 
     db = SessionLocal()

@@ -23,6 +23,13 @@ class OpenAIService:
             - Use PostGIS for provider_zip_code distance calculations
             - Only return the SQL query, no explanations
             - Assume that there is a database function calculate_zip_distance(zip1 TEXT, zip2 TEXT) to calculate distances between zip codes
+            - Provider overall rating is provider_rating.provider_overall_rating
+            - Only return the max overall rating each provider_id
+            - Provider star rating is provider_rating.provider_star_rating
+            - Only return the max star rating each provider_id
+            - Group by provider_id
+            - Ignore provider_pricing_year and provider_rating_year
+            - Limit to top 1 result
 
             Question: {natural_language}
             """

@@ -36,7 +36,3 @@ clean:
 dev-setup:
 	cp .env.example .env
 	docker-compose up --build
-
-# Run migration (if using Alembic)
-migrate:
-	docker-compose exec api alembic upgrade head

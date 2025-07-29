@@ -6,30 +6,17 @@ from ..database import get_db
 from ..schemas import ProviderSearchResponse, QuestionRequest, QuestionResponse
 from ..services.database_service import DatabaseService
 from ..services.openai_service import OpenAIService
-from ..models import Provider, ProviderPricing
 
 router = APIRouter()
 
 @router.get("/providers", response_model=List[ProviderSearchResponse])
 async def search_providers(
-    # See below business case question for these two parameters
-    # provider_id: Optional[int] = Query(None),
-    # provider_name: Optional[str] = Query(None),
     drg_description: Optional[str] = Query(None),
     zip_code: Optional[str] = Query(None),
     zip_code_radius_km: Optional[float] = Query(None),
     db: Session = Depends(get_db)
 ):
     """Search providers by various criteria"""
-
-    # Validate required parameters
-    #if not (provider_id or provider_name):
-    #    raise HTTPException(status_code=400, detail="Either provider_id or provider_name is required")
-
-    # See below zip code business case question
-    # if not (drg_description or zip_code):
-    #     raise HTTPException(status_code=400, detail="Either drg_description or zip_code is required")
-
     if not (drg_description and zip_code and zip_code_radius_km):
         raise HTTPException(status_code=400, detail="All of drg_description, zip_code, and radius_km are required")
 
@@ -38,49 +25,20 @@ async def search_providers(
 
         # Build query based on parameters
         # Zipcode radius searching is mocked.  Need geocode table or call to GoogleMaps for real
-        if drg_description:
-            # Search with DRG description
-            query = """
-            SELECT p.provider_id, p.provider_name, pp.averaged_covered_charges
-            FROM provider p
-            JOIN provider_pricing pp ON p.provider_id = pp.provider_id
-            WHERE pp.ms_drg_definition ILIKE :drg_description
-            and calculate_zip_distance(p.provider_zip_code, :zip_code) < :zip_code_radius_km
-            """
-            params = {
-                "drg_description": f"%{drg_description}%",
-                "zip_code": zip_code,
-                "zip_code_radius_km": zip_code_radius_km
-            }
+        query = """
+        SELECT p.provider_id, p.provider_name, pp.averaged_covered_charges
+        FROM provider p
+        JOIN provider_pricing pp ON p.provider_id = pp.provider_id
+        WHERE pp.ms_drg_definition ILIKE :drg_description
+        and calculate_zip_distance(p.provider_zip_code, :zip_code) < :zip_code_radius_km
+        """
+        params = {
+            "drg_description": f"%{drg_description}%",
+            "zip_code": zip_code,
+            "zip_code_radius_km": zip_code_radius_km
+        }
 
-            # See business question about provider querying
-            # if provider_id:
-            #     query += " AND p.provider_id = :provider_id"
-            #     params["provider_id"] = provider_id
-            # elif provider_name:
-            #     query += " AND p.provider_name ILIKE :provider_name"
-            #     params["provider_name"] = f"%{provider_name}%"
-
-            query += " ORDER BY pp.averaged_covered_charges, p.provider_id"
-
-        # else:
-            # Search by zip code
-            # Business case question:  shouldn't the customer be able to find local providers?
-            # query = """
-            # SELECT p.provider_id, p.provider_name
-            # FROM provider p
-            # WHERE p.provider_zip_code = :zip_code
-            # """
-            # params = {"zip_code": zip_code}
-
-            # if provider_id:
-            #    query += " AND p.provider_id = :provider_id"
-            #    params["provider_id"] = provider_id
-            # elif provider_name:
-            #     query += " AND p.provider_name ILIKE :provider_name"
-            #     params["provider_name"] = f"%{provider_name}%"
-
-            # query += " ORDER BY p.provider_id"
+        query += " ORDER BY pp.averaged_covered_charges, p.provider_id"
 
         results = db_service.execute_safe_query(query, params)
 
@@ -146,7 +104,6 @@ async def ask_question(
         if not sql_query:
             return QuestionResponse(
                 answer=" I can only help with hospital pricing and quality information. Please ask about medical procedures, costs, or hospital ratings.",
-                query_used=None
             )
 
         # Execute the query
@@ -163,7 +120,8 @@ async def ask_question(
             )
 
         # Format results for response
-        answer = f"Found {len(results)} result(s):\n"
+        # answer = f"Found {len(results)} result(s):\n"
+        answer = ""
         for i, result in enumerate(results[:10]):  # Limit to 10 results
             answer += f"{i+1}. {result}\n"
 
@@ -171,9 +129,9 @@ async def ask_question(
             answer += f"... and {len(results) - 10} more results."
 
         return QuestionResponse(
-            answer=answer,
-            query_used=sql_query
+           answer=answer
         )
+        return response
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Service error: {str(e)}")
