@@ -145,7 +145,7 @@ async def ask_question(
 
         if not sql_query:
             return QuestionResponse(
-                answer="I couldn't understand your question. Please try rephrasing it.",
+                answer=" I can only help with hospital pricing and quality information. Please ask about medical procedures, costs, or hospital ratings.",
                 query_used=None
             )
 
@@ -154,14 +154,12 @@ async def ask_question(
 
         if results is None:
             return QuestionResponse(
-                answer="There was an error executing the query. Please try again.",
-                query_used=sql_query
+                answer="I had a problem finding an answer for you. Please try again.",
             )
 
         if not results:
             return QuestionResponse(
-                answer="No results found for your query.",
-                query_used=sql_query
+                answer="I didn't find any hospital pricing or quality information for your question.  Please ask another question"
             )
 
         # Format results for response

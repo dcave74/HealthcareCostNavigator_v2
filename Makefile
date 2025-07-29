@@ -35,9 +35,7 @@ clean:
 # Development setup
 dev-setup:
 	cp .env.example .env
-	docker-compose up -d db test_db
-	sleep 5
-	docker-compose up -d api
+	docker-compose up --build
 
 # Run migration (if using Alembic)
 migrate:

@@ -1,11 +1,11 @@
 
-import openai
+from openai import AsyncOpenAI
+import os
+
+aclient = AsyncOpenAI()
 from typing import Optional
-from ..config import settings
 
 class OpenAIService:
-    def __init__(self):
-        openai.api_key = settings.openai_api_key
 
     async def convert_to_sql(self, natural_language: str, table_schemas: dict) -> Optional[str]:
         """Convert natural language to PostgreSQL query using OpenAI GPT-4.1 nano"""
@@ -22,21 +22,27 @@ class OpenAIService:
             - Use ILIKE for ms_drg_definition matching
             - Use PostGIS for provider_zip_code distance calculations
             - Only return the SQL query, no explanations
+            - Assume that there is a database function calculate_zip_distance(zip1 TEXT, zip2 TEXT) to calculate distances between zip codes
 
             Question: {natural_language}
             """
+            aclient.api_key=os.getenv("OPENAI_API_KEY")
+            response = await aclient.chat.completions.create(model="gpt-4.1-nano",
+            messages=[
+                {"role": "system", "content": "You are a SQL expert. Convert natural language to PostgreSQL queries."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.1)
 
-            response = await openai.ChatCompletion.acreate(
-                model="gpt-4.1-nano",
-                messages=[
-                    {"role": "system", "content": "You are a SQL expert. Convert natural language to PostgreSQL queries."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.1
-            )
-
+            # These two print statements are left intentionally for logging
+            # Replace with logging framework of your choice
+            # Alternatively these and the asked question could be archived but that comes with
+            # privacy issues.  The basic data we have should be mostly harmless since it is not
+            # attributed to any specific user and is already public data
+            print(response.to_json())
             sql_query = response.choices[0].message.content.strip()
+            print(sql_query)
 
             if self._validate_sql_response(sql_query):
                 return sql_query

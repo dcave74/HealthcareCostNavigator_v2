@@ -52,7 +52,7 @@ def test_data_import_service_skip_rows():
     }
     assert service._should_skip_row(row2) == False
 
-@patch('openai.ChatCompletion.acreate')
+@patch('openai.resources.chat.Completions.acreate')
 def test_openai_service_sql_conversion(mock_openai):
     """Test OpenAI service SQL conversion"""
     # Mock OpenAI response
