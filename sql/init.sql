@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS provider (
 CREATE INDEX IF NOT EXISTS idx_provider_zip_code ON provider(provider_zip_code);
 
 CREATE TABLE IF NOT EXISTS provider_pricing (
+    provider_pricing_id SERIAL PRIMARY KEY,
     provider_id INT NOT NULL,
     ms_drg_definition VARCHAR(1000) NOT NULL,
     total_discharges INT DEFAULT 0,
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS provider_pricing (
 CREATE INDEX IF NOT EXISTS idx_provider_pricing_ms_drg ON provider_pricing(ms_drg_definition);
 
 CREATE TABLE IF NOT EXISTS provider_rating (
+    provider_rating_id SERIAL PRIMARY KEY,
     provider_id INT NOT NULL,
     provider_overall_rating INT DEFAULT 0,
     provider_star_rating INT DEFAULT 0,

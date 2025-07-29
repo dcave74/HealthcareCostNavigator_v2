@@ -8,10 +8,14 @@
     - **Natural Language Queries**: Convert plain English questions to SQL queries using OpenAI
     - **Provider Search**: Search providers by DRG descriptions, zip codes, and other criteria
     - **PostGIS Integration**: Calculate distances between zip codes
+            - PostGIS is usually preinstalled on cloud PostgreSQL instances.  
+                If it is not or you are building locally, make sure it is installed on your machine where PostgreSQL is installed.
+                To install locally run sudo apt install postgresql-16-postgis-3
+            - Select for arm/amd in docker-compose.yml as PostGIS is not multiplatform officially yet
+            - Distance calculation is temporarily mocked pending building geo database or GoogleMap integration
     - **Data Import**: Automated data seeding from CMS datasets
     - **Docker Support**: Complete containerization with PostgreSQL and PostGIS
-    - **PostGIS**:  PostGIS is usually preinstalled on cloud PostgreSQL instances.  If it is not or you are building locally, make sure it is installed on your machine where PostgreSQL is installed.
-    
+
     ## Quick Start
     
     1. **Clone and Setup**
@@ -88,11 +92,14 @@ Use service methods to import custom data
     - Change all passwords for production use
     - Ensure OpenAI API key is kept secure
     - SQL injection protection is implemented via parameterized queries
+    - Installing PostGIS via docker comes with security risks that must be addressed if automated:
+        https://github.com/postgis/docker-postgis
     
     ## Architecture
     
     - **FastAPI**: Modern Python web framework
     - **SQLAlchemy 2.0**: Database ORM
+        - NOTE: SQLAlchemy requires primary keys, so otherwise PK free tables need PKs
     - **PostgreSQL 16**: Primary database
     - **PostGIS 3.5**: Geospatial extensions
     - **OpenAI GPT-4.1 nano**: Natural language processing

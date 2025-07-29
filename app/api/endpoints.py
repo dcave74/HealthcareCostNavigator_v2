@@ -37,18 +37,20 @@ async def search_providers(
         db_service = DatabaseService(db)
 
         # Build query based on parameters
+        # Zipcode radius searching is mocked.  Need geocode table or call to GoogleMaps for real
         if drg_description:
             # Search with DRG description
             query = """
             SELECT p.provider_id, p.provider_name, pp.averaged_covered_charges
             FROM provider p
             JOIN provider_pricing pp ON p.provider_id = pp.provider_id
-            WHERE pp.ms_drg_definition ILIKE :drg_description 
-            and p.provider_zip_code = :zip_code
+            WHERE pp.ms_drg_definition ILIKE :drg_description
+            and calculate_zip_distance(p.provider_zip_code, :zip_code) < :zip_code_radius_km
             """
             params = {
                 "drg_description": f"%{drg_description}%",
-                "zip_code": zip_code
+                "zip_code": zip_code,
+                "zip_code_radius_km": zip_code_radius_km
             }
 
             # See business question about provider querying

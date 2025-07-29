@@ -18,7 +18,7 @@ class Provider(Base):
 class ProviderPricing(Base):
     __tablename__ = "provider_pricing"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    provider_pricing_id = Column(Integer, primary_key=True, autoincrement=True)
     provider_id = Column(Integer, ForeignKey("provider.provider_id"), nullable=False)
     ms_drg_definition = Column(String(1000), nullable=False)
     total_discharges = Column(Integer, default=0)
@@ -32,7 +32,7 @@ class ProviderPricing(Base):
 class ProviderRating(Base):
     __tablename__ = "provider_rating"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    provider_rating_id = Column(Integer, primary_key=True, autoincrement=True)
     provider_id = Column(Integer, ForeignKey("provider.provider_id"), nullable=False)
     provider_overall_rating = Column(Integer, default=0)
     provider_star_rating = Column(Integer, default=0)
